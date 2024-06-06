@@ -1,18 +1,37 @@
 /* eslint-disable prettier/prettier */
+import { OpenExchangeService } from 'src/openexchange/openexchange.service';
 import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import * as dotenv from 'dotenv';
+import * as path from 'path';
+import * as fs from 'fs';
 
 dotenv.config();
 
 const testApiKey = process.env.OPENAI_API_KEY ? '🚀 API Key Loaded' : 'ERROR: API Key not found';
 console.log(testApiKey);
 
+// Op1 - Absolute Path:
+const productsFilePath = path.resolve(process.cwd(), 'products_list.json');
+// Op2 - Relative path:
+// const productsFilePath = path.resolve(__dirname, '../../products_list.json');
+
+let productsList = [];
+
+if (fs.existsSync(productsFilePath)) {
+    const productsData = fs.readFileSync(productsFilePath, 'utf-8');
+    productsList = JSON.parse(productsData);
+    console.log("🚀 productsList data length:", productsList.length)
+} else {
+    console.error('Products file not found');
+}
+
+
 @Injectable()
 export class ChatbotService {
     private openai: OpenAI;
 
-    constructor() {
+    constructor(private openExchangeService: OpenExchangeService) {
         this.openai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY,
         });
@@ -59,14 +78,17 @@ export class ChatbotService {
             //     .join(', ')}. Indicate wich function you want to use to solve the users enquiry`;
 
             const response = await this.openai.chat.completions.create({
-                model: 'gpt-3.5-turbo',
+                model: 'gpt-4o',
                 messages: messages,
                 tools: tools,
                 tool_choice: 'auto',
             })
 
-            console.log("🚀 ~ handlequery ~ completion :", response)
             const responseMessage = response.choices[0].message;
+            console.log("🚀 #1 -First response:", responseMessage)
+
+            messages.push(responseMessage);
+
             const toolCalls = responseMessage.tool_calls;
 
             if (toolCalls && toolCalls.length > 0) {
@@ -80,10 +102,11 @@ export class ChatbotService {
                     const functionToCall = availableFunctions[functionName];
                     const functionArgs = JSON.parse(toolCall.function.arguments);
                     const functionResponse = await functionToCall(functionArgs);
+                    // const functionResponse = await functionToCall(functionName, functionArgs);
 
                     messages.push({
-                        tool_call_id: toolCall.id,
                         role: 'tool',
+                        tool_call_id: toolCall.id,
                         // name: functionName,
                         content: functionResponse,
                     });
@@ -91,9 +114,10 @@ export class ChatbotService {
                 }
 
                 const secondResponse = await this.openai.chat.completions.create({
-                    model: 'gpt-3.5-turbo',
+                    model: 'gpt-4o',
                     messages: messages,
                 });
+                console.log("🚀#2 - Second response:", secondResponse.choices[0].message.content)
 
                 return secondResponse.choices[0].message.content;
             } else {
@@ -111,15 +135,28 @@ export class ChatbotService {
     }
 
     async searchProducts(args: { query: string }): Promise<string> {
-        // Simulate a product search
-        const products = [{ id: 1, name: 'Widget', description: 'A useful widget' }];
-        return JSON.stringify(products);
+        console.log("🚀 searchProducts ~ args:", args)
+        const searchQuery = args.query.toLowerCase();
+        const filterProducts = productsList.filter(product =>
+            product.displayTitle.toLowerCase().includes(searchQuery) ||
+            product.embeddingText.toLowerCase().includes(searchQuery));
+
+        const result = filterProducts.slice(0, 2);
+        console.log("🚀 searchProducts:", result[0].displayTitle)
+        return JSON.stringify(result);
     }
 
     async convertCurrencies(args: { amount: number, fromCurrency: string, toCurrency: string }): Promise<string> {
-        // Simulate currency conversion
-        const result = { convertedAmount: args.amount * 1.1 }; // Simulated conversion rate
-        return JSON.stringify(result);
+        console.log("🚀 convertCurrencies ~ args:", args)
+        try {
+            const exchangeRate = await this.openExchangeService.getExchangeRate(args.fromCurrency, args.toCurrency);
+            console.log("🚀 ~ exchangeRate:", exchangeRate)
+            const convertedAmount = args.amount * exchangeRate;
+            return JSON.stringify({ convertedAmount })
+        } catch (error) {
+            console.error('Error converting currencies:', error.message);
+            return 'Error converting currencies. Please try again later.';
+        }
     }
 
 }

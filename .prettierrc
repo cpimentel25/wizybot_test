@@ -1,6 +1,4 @@
 {
   "singleQuote": true,
-  "trailingComma": "all",
-  "parser": "flow",
-  "endOfLine": "lf"
+  "trailingComma": "all"
 }
