@@ -208,7 +208,8 @@ A series of query tests were performed on the chatbot using various prompts to e
 4. **Query:** "How many Canadian Dollars are 350 Euros"
    - **Result:** 350 Euros are equivalent to approximately 478.94 Canadian Dollars.
 
-These tests helped validate the behavior and accuracy of the chatbot in product search and recommendation.
+5. **Query:** "What price does the iPhone 13 have and what is the price of the iPhone13 in Colombian pesos be?"
+   - **Result:** The price of the iPhone 13 is around $1,099 USD. Considering the current conversion rate, 1 USD is approximately equivalent to 3934.50 COP (Colombian Pesos). Therefore, the price of the iPhone 13 in Colombian Pesos would be approximately: 1,099 USD * 3934.50 COP/USD ≈ 4,325,160.73 COP. So, the iPhone 13 would cost about 4,325,160 Colombian Pesos.
 
 ## Installation of CSV to JSON Conversion Library
 
@@ -236,7 +237,7 @@ fs.createReadStream(csvFilePath)
 ```
 
 ## Swagger Documentation
-This project uses Swagger to provide interactive API documentation. Swagger is a powerful tool that helps visualize and interact with the API's resources without having to dig into the code.
+In this project uses Swagger to provide interactive API documentation. Swagger is a powerful tool that helps visualize and interact with the API's resources without having to dig into the code.
 
 ### Accessing Swagger
 To access the Swagger documentation for this project, follow these steps:

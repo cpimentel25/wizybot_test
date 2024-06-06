@@ -108,12 +108,10 @@ export class ChatbotService {
                     const functionToCall = availableFunctions[functionName];
                     const functionArgs = JSON.parse(toolCall.function.arguments);
                     const functionResponse = await functionToCall(functionArgs);
-                    // const functionResponse = await functionToCall(functionName, functionArgs);
 
                     messages.push({
                         role: 'tool',
                         tool_call_id: toolCall.id,
-                        // name: functionName,
                         content: functionResponse,
                     });
 
@@ -164,17 +162,8 @@ export class ChatbotService {
                 },
             });
 
-            // Convert method (pay method only!)
-            // const convert = await axios.get(`https://openexchangerates.org/api/convert/${args.amount}/${args.fromCurrency}/${args.toCurrency}`, {
-            //     params: {
-            //         app_id: process.env.OPEN_EXCHANGE_APP_ID,
-            //     },
-            // });
-
             const rates = response.data.rates;
             const exchangeRate = rates[args.toCurrency]
-            console.log("🚀 ~ exchangeBase:", response.data.base) // USD Default only aviable in free account
-            console.log("🚀 ~ exchangeRate:", exchangeRate)
             const convertedAmount = args.amount * exchangeRate;
             return JSON.stringify({ convertedAmount })
         } catch (error) {
