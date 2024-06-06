@@ -5,6 +5,7 @@ import OpenAI from 'openai';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as fs from 'fs';
+import axios from 'axios';
 
 dotenv.config();
 
@@ -121,7 +122,8 @@ export class ChatbotService {
 
                 return secondResponse.choices[0].message.content;
             } else {
-                return 'Sorry, I could not understand your request.';
+                return responseMessage.content // Op1 response
+                return 'Sorry, I could not understand your request.'; // Op2response
             }
 
         } catch (error) {
@@ -149,7 +151,23 @@ export class ChatbotService {
     async convertCurrencies(args: { amount: number, fromCurrency: string, toCurrency: string }): Promise<string> {
         console.log("🚀 convertCurrencies ~ args:", args)
         try {
-            const exchangeRate = await this.openExchangeService.getExchangeRate(args.fromCurrency, args.toCurrency);
+            // const exchangeRate = await this.openExchangeService.getExchangeRate(args.fromCurrency, args.toCurrency);
+            const response = await axios.get('https://openexchangerates.org/api/latest.json', {
+                params: {
+                    app_id: process.env.OPEN_EXCHANGE_APP_ID,
+                },
+            });
+
+            // Convert method (pay method only!)
+            // const convert = await axios.get(`https://openexchangerates.org/api/convert/${args.amount}/${args.fromCurrency}/${args.toCurrency}`, {
+            //     params: {
+            //         app_id: process.env.OPEN_EXCHANGE_APP_ID,
+            //     },
+            // });
+
+            const rates = response.data.rates;
+            const exchangeRate = rates[args.toCurrency]
+            console.log("🚀 ~ exchangeBase:", response.data.base) // USD Default only aviable in free account
             console.log("🚀 ~ exchangeRate:", exchangeRate)
             const convertedAmount = args.amount * exchangeRate;
             return JSON.stringify({ convertedAmount })
@@ -158,5 +176,4 @@ export class ChatbotService {
             return 'Error converting currencies. Please try again later.';
         }
     }
-
 }

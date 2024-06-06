@@ -4,6 +4,6 @@ import { OpenExchangeService } from "./openexchange.service";
 
 @Module({
     providers: [OpenExchangeService],
-    exports: [OpenExchangeService]
+    exports: [OpenExchangeService],
 })
 export class OpenExchangeModule { }

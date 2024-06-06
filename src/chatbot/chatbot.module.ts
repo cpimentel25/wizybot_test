@@ -7,6 +7,6 @@ import { OpenExchangeModule } from 'src/openexchange/openexchange.module';
 @Module({
   imports: [OpenExchangeModule],
   controllers: [ChatbotController],
-  providers: [ChatbotService]
+  providers: [ChatbotService],
 })
 export class ChatbotModule { }

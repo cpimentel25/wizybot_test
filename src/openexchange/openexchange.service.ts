@@ -8,8 +8,8 @@ export class OpenExchangeService {
     private readonly APP_ID = process.env.OPEN_EXCHANGE_APP_ID;
 
     async getExchangeRate(fromCurrency: string, toCurrency: string): Promise<number> {
+        console.log("🚀 ~ APP_ID:", process.env.OPEN_EXCHANGE_APP_ID)
         try {
-            console.log("🚀 ~ APP_ID:", process.env.OPEN_EXCHANGE_APP_ID)
             const response = await axios.get(`${this.BASE_URL}/latest.json`, {
                 params: {
                     app_id: this.APP_ID,
