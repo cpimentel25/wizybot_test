@@ -8,7 +8,6 @@ export class OpenExchangeService {
     private readonly APP_ID = process.env.OPEN_EXCHANGE_APP_ID;
 
     async getExchangeRate(fromCurrency: string, toCurrency: string): Promise<number> {
-        console.log("🚀 ~ APP_ID:", process.env.OPEN_EXCHANGE_APP_ID)
         try {
             const response = await axios.get(`${this.BASE_URL}/latest.json`, {
                 params: {
@@ -18,7 +17,6 @@ export class OpenExchangeService {
             });
 
             const rates = response.data.rates;
-            console.log("🚀 ~ OpenExchangeService ~ rates:", rates)
             const exchangeRate = rates[toCurrency];
             if (!exchangeRate) {
                 throw new Error(`Exchange rate for ${toCurrency} not found.`);

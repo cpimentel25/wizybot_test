@@ -123,7 +123,7 @@ export class ChatbotService {
                 return secondResponse.choices[0].message.content;
             } else {
                 return responseMessage.content // Op1 response
-                return 'Sorry, I could not understand your request.'; // Op2response
+                // return 'Sorry, I could not understand your request.'; // Op2 response
             }
 
         } catch (error) {

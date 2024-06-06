@@ -71,3 +71,34 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+## Open Exchange
+
+The free tier of Open Exchange Rate API only supports conversion from 'USD'. The implementation for currency conversion is as follows:
+
+![openExchange_free](public/img/openExchange_free.png)
+
+```
+const response = await axios.get('https://openexchangerates.org/api/latest.json', {
+                params: {
+                    app_id: process.env.OPEN_EXCHANGE_APP_ID,
+                },
+            });
+
+const rates = response.data.rates;
+const exchangeRate = rates[args.toCurrency]
+const convertedAmount = args.amount * exchangeRate;
+return JSON.stringify({ convertedAmount })
+```
+
+Or if you want to use the paid tier, the API call would be as follows:
+
+![openExchange_pay](public/img/openExchange_pay.png)
+```
+const convert = await axios.get(`https://openexchangerates.org/api/convert/${args.amount}/${args.fromCurrency}/${args.toCurrency}`, {
+                params: {
+                    app_id: process.env.OPEN_EXCHANGE_APP_ID,
+                },
+            });
+
+```
