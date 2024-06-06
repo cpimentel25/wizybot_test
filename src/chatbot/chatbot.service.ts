@@ -1,11 +1,14 @@
 /* eslint-disable prettier/prettier */
-import { OpenExchangeService } from 'src/openexchange/openexchange.service';
 import { Injectable } from '@nestjs/common';
 import OpenAI from 'openai';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as fs from 'fs';
 import axios from 'axios';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ConvertCurrenciesDto } from './dto/convertCurrencies.dto';
+import { HandleQueryDto } from './dto/handlequery.dto';
+import { searchProducts } from './dto/searchProduct.dto';
 
 dotenv.config();
 
@@ -27,18 +30,20 @@ if (fs.existsSync(productsFilePath)) {
     console.error('Products file not found');
 }
 
-
+@ApiTags('chatbot')
 @Injectable()
 export class ChatbotService {
     private openai: OpenAI;
 
-    constructor(private openExchangeService: OpenExchangeService) {
+    constructor() {
         this.openai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY,
         });
     }
 
-    async handlequery(query: string): Promise<string> {
+    @ApiOperation({ summary: 'Handle user query' })
+    async handlequery(queryDto: HandleQueryDto): Promise<string> {
+        const query = queryDto.query;
         try {
             const messages: OpenAI.ChatCompletionMessageParam[] = [{ role: 'user', content: query }];
             const tools: OpenAI.ChatCompletionTool[] = [
@@ -136,7 +141,8 @@ export class ChatbotService {
 
     }
 
-    async searchProducts(args: { query: string }): Promise<string> {
+    @ApiOperation({ summary: 'User query string' })
+    async searchProducts(args: searchProducts): Promise<string> {
         console.log("🚀 searchProducts ~ args:", args)
         const searchQuery = args.query.toLowerCase();
         const filterProducts = productsList.filter(product =>
@@ -148,10 +154,10 @@ export class ChatbotService {
         return JSON.stringify(result);
     }
 
-    async convertCurrencies(args: { amount: number, fromCurrency: string, toCurrency: string }): Promise<string> {
+    @ApiOperation({ summary: 'Convert currencies' })
+    async convertCurrencies(args: ConvertCurrenciesDto): Promise<string> {
         console.log("🚀 convertCurrencies ~ args:", args)
         try {
-            // const exchangeRate = await this.openExchangeService.getExchangeRate(args.fromCurrency, args.toCurrency);
             const response = await axios.get('https://openexchangerates.org/api/latest.json', {
                 params: {
                     app_id: process.env.OPEN_EXCHANGE_APP_ID,
